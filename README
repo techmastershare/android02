@@ -1,0 +1,74 @@
+This repository was created to store homework of the first android course. If you are member of the course, you could create a branch to save your source code there but remember that this repository is public so you should store public resources here.
+
+1. Repository:
+https://github.com/techmastershare/android02.git
+
+2. Steps to create your own branch
+2.1. Configure user settings
+	$ git config --global user.email foo@example.com
+	$ git config --global user.name 'Foo Bar'
+	
+2.2. Create your own branch
+	$ git clone https://github.com/techmastershare/android02.git
+	$ git pull
+
+	# Create a local branch
+	$ git branch your_user_name 
+	(for example: $ git branch duongnt)
+
+	# Push your branch to the git server
+	$ git push origin your_branch
+
+	# Switch branch
+	$ git checkout your_branch
+
+	# Remove a local branch
+	$ git branch -d your_branch
+
+	# Remove remote branch
+	$ git push origin :your_branch
+
+	# List local branches
+	$ git branch
+
+	# List remote branches
+	$ git branch -r
+
+2.3. Create your homework folders
+After creating your own branch and checking out it, please create folders to save every exercise for each lesson of the course. The naming convention looks like:
+
+└── android02
+    ├── cuongtm
+    │   ├── assignment
+    │   ├── day1
+    │   ├── graduation
+    │   └── information
+    │       ├── avatar.img
+    │       └── contact.txt
+    └── duongnt
+        ├── assignment
+        ├── day1
+        ├── day2
+        ├── day3
+        ├── graduation
+        └── information
+            ├── avatar.img
+            └── contact.txt
+Note: information folder must include 2 files avatar.img as your current avatar and contact.txt as your contact information which includes full name, address (optional), current company (optional) and your mobile phone number. Please fill them in order to we could contact later ;)
+
+2.4. After completing your homework please push your source code to the correct branch then send a mail to me to request reviewing (seedotech@gmail.com). I will check and review your source code and send feedback if I have. The content of the mail request looks like:
+
+Example for Day2
+
+Title: [Android02-Day2] Request reviewing source code
+
+Content: 
+Hi raycad,
+	I'd like to request you to review my homework source code. Please check the repository:
+$ git clone https://github.com/techmastershare/android02.git
+Revision information: [branch_name/revision]
+duongnt/a239hf...894nfb
+
+Thanks and best regards,
+
+Your name.
