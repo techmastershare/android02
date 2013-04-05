@@ -1,0 +1,84 @@
+package com.android.gameforchild;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.ImageView;
+
+public class Job extends Activity {
+  MediaPlayer mp1,mp2,mp3,mp4= null;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.job);
+
+		mp1= MediaPlayer.create(this, R.drawable.doctor1);
+		mp2= MediaPlayer.create(this, R.drawable.ambulance1);
+		mp3= MediaPlayer.create(this, R.drawable.fireman1);
+		mp4= MediaPlayer.create(this, R.drawable.firetruck1);
+		Button btnHome=(Button) findViewById(R.id.btn_home);
+		Button btnNext= (Button) findViewById(R.id.btn_next);
+		Button btnBack=(Button) findViewById(R.id.btn_back);
+		final ImageView iv1= (ImageView) findViewById(R.id.img_view1);
+		final ImageView iv2=(ImageView) findViewById(R.id.img_view2);
+		btnBack.setOnClickListener(new OnClickListener()
+		{
+
+			public void onClick(View v) {
+				Bitmap bmap1=BitmapFactory.decodeResource(getResources(), R.drawable.doctor);
+				iv1.setImageBitmap(bmap1);
+				mp1.start();
+				iv2.setBackgroundDrawable(null);
+				iv1.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Bitmap bmap2=BitmapFactory.decodeResource(getResources(), R.drawable.amubale);
+						iv2.setImageBitmap(bmap2);
+						mp2.start();
+
+					}
+				});
+			}
+		});
+		btnNext.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Bitmap bmap1=BitmapFactory.decodeResource(getResources(),R.drawable.fireman);
+				iv1.setImageBitmap(bmap1);
+				mp3.start();
+				iv2.setBackgroundDrawable(null);
+
+				iv1.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Bitmap bmap2=BitmapFactory.decodeResource(getResources(), R.drawable.firecar);
+						iv2.setImageBitmap(bmap2);
+						mp4.start();
+					}
+				});
+			}
+		});
+		btnHome.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				Intent intent1= new Intent(Job.this,MainActivity.class);
+				startActivity(intent1);
+
+				finish();
+			}
+		});
+	}
+
+}
