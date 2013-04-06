@@ -19,10 +19,10 @@ public class MainActivity extends Activity {
 
 	ArrayList<Integer[]> imageContain = new ArrayList<Integer[]>();
 
-	ImageView mLeft = (ImageView) findViewById(R.id.leftImage);
-	ImageView mRight = (ImageView) findViewById(R.id.rightImage);
-	ImageView nextImage = (ImageView) findViewById(R.id.next);
-	ImageView backImage = (ImageView) findViewById(R.id.back);
+	ImageView mLeft;
+	ImageView mRight;
+	ImageView nextImage;
+	ImageView backImage;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +31,11 @@ public class MainActivity extends Activity {
 		imageContain.add(docImage);
 		imageContain.add(workerImager);
 		imageContain.add(ffImage);
+
+		mLeft = (ImageView) findViewById(R.id.leftImage);
+		mRight = (ImageView) findViewById(R.id.rightImage);
+		nextImage = (ImageView) findViewById(R.id.next);
+		backImage = (ImageView) findViewById(R.id.back);
 
 		nextImage.setOnClickListener(new View.OnClickListener() {
 
@@ -67,5 +72,4 @@ public class MainActivity extends Activity {
 		});
 	}
 
-	
 }
