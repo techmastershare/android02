@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:paddingLeft="5dp"
+    android:paddingRight="2dp"
+    android:paddingTop="2dp">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time: "
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" TIME: "
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"         
+        android:paddingTop="3dp"
+        android:stretchColumns="1">
+    <TableRow 
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        >
+        
+        <TextView
+            
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+             android:layout_weight="0"
+             android:layout_marginLeft="2dp"
+            android:text="NOTE:" />
+        
+         <TextView
+            android:id="@+id/tvNote"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            
+            />
+
+         <Button
+             android:id="@+id/editBt"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+            
+             android:text="Edit" />
+
+        <Button
+            android:id="@+id/btRemove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            
+            android:text="Remove" />
+
+        </TableRow>
+    </TableLayout>>
+
+</LinearLayout>
