@@ -1,0 +1,32 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/text_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp"
+        android:text="sida"
+        android:textSize="18dp" />
+
+    <TextView
+        android:id="@+id/notes_view"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="sida"
+        android:textSize="12dp" />
+
+    <Button
+        android:id="@+id/delete_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="DELETE" />
+    <Button 
+        android:id="@+id/edit_button"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="EDIT"/>
+
+</LinearLayout>
