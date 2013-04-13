@@ -1,6 +1,7 @@
 package com.example.noteapp.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -41,7 +42,9 @@ public class NoteEditActivity extends Activity {
 				}
 				saveNote(note);
 				Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
-				NoteEditActivity.this.finish();
+				Intent intent = new Intent(NoteEditActivity.this, NoteContentActivity.class);
+				intent.putExtra("note_object", note);
+				startActivity(intent);
 			}
 		});
 	}

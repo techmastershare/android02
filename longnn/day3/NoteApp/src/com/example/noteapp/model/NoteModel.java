@@ -72,6 +72,20 @@ public class NoteModel extends SQLiteOpenHelper {
 		return mNoteList.get(index);
 	}
 
+	public Note getNote(int id) {
+		SQLiteDatabase db = this.getReadableDatabase();
+		Note note = null;
+		Cursor cursor = db.query(TABLE_NAME, new String[] { ID, TITLE, CONTENT }, ID + "=?", new String[] { String.valueOf(id) },
+				null, null, null);
+		if (cursor.getCount() > 0) {
+			cursor.moveToFirst();
+			note = new Note(cursor.getInt(0), cursor.getString(1), cursor.getString(2));
+		}
+
+		db.close();
+		return note;
+	}
+
 	public List<Note> getAllNote() {
 		List<Note> noteList = new ArrayList<Note>();
 		SQLiteDatabase db = getReadableDatabase();

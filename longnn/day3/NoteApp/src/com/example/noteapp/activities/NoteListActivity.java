@@ -27,9 +27,8 @@ import com.example.noteapp.view.NoteItemView;
 public class NoteListActivity extends Activity {
 
 	private ListView mListView;
-	NoteAdapter noteAdapter;
-	NoteModel noteModel;
-	EditText searchEditText;
+	private NoteAdapter mNoteAdapter;
+	private NoteModel mNoteModel;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,22 +61,36 @@ public class NoteListActivity extends Activity {
 			}
 		});
 
-		noteModel = new NoteModel(getApplicationContext());
-		noteAdapter = new NoteAdapter();
+		mNoteModel = new NoteModel(getApplicationContext());
+		mNoteAdapter = new NoteAdapter();
 
-		final List<Note> noteList = noteModel.getAllNote();
-		fillDataToListView(noteList);
+		final List<Note> noteList = mNoteModel.getAllNote();
+		mNoteModel.setNoteList(noteList);
+		mNoteAdapter.setContext(this);
+		mNoteAdapter.setNoteModel(mNoteModel);
+		mNoteAdapter.setOnNoteDeleteListener(new NoteItemView.OnNoteDeleteListener() {
 
-		searchEditText = (EditText) findViewById(R.id.search_edit_text);
+			@Override
+			public void onDeleteNoteClicked(Note note) {
+				if (note != null) {
+					mNoteModel.deleteNote(note);
+					fillDataToListView(mNoteModel.getAllNote());
+				}
+			}
+		});
+
+		mListView.setAdapter(mNoteAdapter);
+
+		final EditText searchEditText = (EditText) findViewById(R.id.search_edit_text);
 		searchEditText.setOnKeyListener(new View.OnKeyListener() {
 
 			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				String text = searchEditText.getText().toString();
 				if (text.length() > 0) {
-					fillDataToListView(noteModel.searchNote(text));
+					fillDataToListView(mNoteModel.searchNote(text));
 				} else {
-					fillDataToListView(noteList);
+					fillDataToListView(mNoteModel.getAllNote());
 				}
 				return false;
 			}
@@ -85,17 +98,15 @@ public class NoteListActivity extends Activity {
 	}
 
 	private void fillDataToListView(List<Note> noteList) {
-		noteModel.setNoteList(noteList);
-		noteAdapter.setContext(this);
-		noteAdapter.setNoteModel(noteModel);
-		mListView.setAdapter(noteAdapter);
+		mNoteModel.setNoteList(noteList);
+		mNoteAdapter.notifyDataSetChanged();
 	}
 
 	@Override
 	protected void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		fillDataToListView(noteModel.getAllNote());
+		fillDataToListView(mNoteModel.getAllNote());
 	}
 
 	@Override
@@ -119,12 +130,12 @@ public class NoteListActivity extends Activity {
 	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getTitle().equals("Delete")) {
 			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-			Note note = noteModel.get(info.position);
-			noteModel.deleteNote(note);
-			fillDataToListView(noteModel.getAllNote());
+			Note note = mNoteModel.get(info.position);
+			mNoteModel.deleteNote(note);
+			fillDataToListView(mNoteModel.getAllNote());
 		} else if (item.getTitle().equals("Edit")) {
 			AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-			Note note = noteModel.get(info.position);
+			Note note = mNoteModel.get(info.position);
 			Intent intent = new Intent(getApplicationContext(), NoteEditActivity.class);
 			intent.putExtra("note_object", note);
 			startActivity(intent);

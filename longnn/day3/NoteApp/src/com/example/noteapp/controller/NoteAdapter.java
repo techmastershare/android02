@@ -1,18 +1,24 @@
 package com.example.noteapp.controller;
 
-import com.example.noteapp.model.Note;
-import com.example.noteapp.model.NoteModel;
-import com.example.noteapp.view.NoteItemView;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+import com.example.noteapp.model.Note;
+import com.example.noteapp.model.NoteModel;
+import com.example.noteapp.view.NoteItemView;
+
 public class NoteAdapter extends BaseAdapter {
 
 	private NoteModel mNoteModel;
 	private Context mContext;
+
+	public NoteItemView.OnNoteDeleteListener onNoteDeleteListener;
+
+	public void setOnNoteDeleteListener(NoteItemView.OnNoteDeleteListener callback) {
+		onNoteDeleteListener = callback;
+	}
 
 	public NoteModel getNoteModel() {
 		return mNoteModel;
@@ -32,9 +38,9 @@ public class NoteAdapter extends BaseAdapter {
 
 	@Override
 	public int getCount() {
-		if(mNoteModel!=null)
+		if (mNoteModel != null)
 			return mNoteModel.size();
-		
+
 		return 0;
 	}
 
@@ -56,14 +62,23 @@ public class NoteAdapter extends BaseAdapter {
 	public View getView(int position, View convertView, ViewGroup parent) {
 		NoteItemView view = (NoteItemView) convertView;
 		Note note = mNoteModel.get(position);
-		
+
 		if (view == null) {
 			view = new NoteItemView(mContext, null);
+			view.setOnNoteDeleteListener(new NoteItemView.OnNoteDeleteListener() {
+
+				@Override
+				public void onDeleteNoteClicked(Note note) {
+					if (onNoteDeleteListener != null) {
+						onNoteDeleteListener.onDeleteNoteClicked(note);
+					}
+				}
+			});
 		}
 
 		view.setNote(note);
 		view.updateView();
-		
+
 		return view;
 	}
 
