@@ -45,18 +45,18 @@ public class MainActivity extends Activity {
 				if (asset.equals("imgReader")) {
 					path = mAssetMgr.open(asset + "/thumb.png");
 					mFolderName.add(new ItemReader("Image Reader", path));
-					mListReader.setAdapter(new ReaderAdapter(this, mFolderName));
+					
 				} else if (asset.equals("docReader")) {
 					path = mAssetMgr.open(asset + "/thumb.png");
 					mFolderName.add(new ItemReader("Document Reader", path));
-					mListReader.setAdapter(new ReaderAdapter(this, mFolderName));
+					
 				} else if (asset.equals("pdfReader")) {
 					path = mAssetMgr.open(asset + "/thumb.png");
 					mFolderName.add(new ItemReader("PDF Reader", path));
-					mListReader.setAdapter(new ReaderAdapter(this, mFolderName));
+					
 				}
 			}
-
+			mListReader.setAdapter(new ReaderAdapter(this, mFolderName));
 			mListReader.setOnItemClickListener(new OnItemClickListener() {
 
 				@Override
