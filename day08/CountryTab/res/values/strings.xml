@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">stringTab</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="au"></string>
+    <string name="at"></string>
+    <string name="be"></string>
+    <string name="br"></string>
+    <string name="ca"></string>
+    <string name="cn"></string>
+    <string name="dk"></string>
+    <string name="fr"></string>
+    <string name="de"></string>
+    <string name="hk"></string>
+    <string name="in"></string>
+    <string name="id"></string>
+    <string name="it"></string>
+    <string name="kr"></string>
+    <string name="nl"></string>
+    <string name="no"></string>
+    <string name="pt"></string>
+    <string name="sg"></string>
+    <string name="es"></string>
+    <string name="se"></string>
+    <string name="ch"></string>
+    <string name="tw"></string>
+    <string name="uk"></string>
+    <string name="us"></string>
+    <string name="cam"></string>
+    <string name="niger"></string>
+    <string name="egy"></string>
+    <string name="ken"></string>
+    <string name="gha"></string>
+
+</resources>
