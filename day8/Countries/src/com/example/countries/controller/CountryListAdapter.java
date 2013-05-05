@@ -8,11 +8,13 @@ import android.widget.BaseAdapter;
 import com.example.countries.model.Country;
 import com.example.countries.model.CountryModel;
 import com.example.countries.view.CountryItemView;
+import com.example.countries.view.CountryItemView.OnButtonDetailClick;
 
 public class CountryListAdapter extends BaseAdapter {
 
 	private CountryModel mCountryModel;
 	private Context mContext;
+	private OnButtonDetailClick mOnButtonDetailClick;
 
 	public void setCountryModel(CountryModel model) {
 		mCountryModel = model;
@@ -20,6 +22,10 @@ public class CountryListAdapter extends BaseAdapter {
 
 	public void setContext(Context context) {
 		this.mContext = context;
+	}
+
+	public void setOnButtonDetailClicked(OnButtonDetailClick onButtonDetailClick) {
+		this.mOnButtonDetailClick = onButtonDetailClick;
 	}
 
 	@Override
@@ -46,15 +52,23 @@ public class CountryListAdapter extends BaseAdapter {
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		CountryItemView view = (CountryItemView) convertView;
+		Country country = mCountryModel.get(position);
 		if (view == null) {
 			view = new CountryItemView(mContext, null);
+			view.setOnButtonDetailClick(new OnButtonDetailClick() {
+
+				@Override
+				public void onButtonClicked(Country country) {
+					if (mOnButtonDetailClick != null) {
+						mOnButtonDetailClick.onButtonClicked(country);
+					}
+				}
+			});
 		}
 
-		Country country = mCountryModel.get(position);
 		view.setCountry(country);
 		view.update();
 
 		return view;
 	}
-
 }

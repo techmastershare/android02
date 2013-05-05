@@ -1,14 +1,11 @@
 package com.example.countries.model;
 
-import java.io.Serializable;
-
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Country implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+public class Country implements Parcelable {
+
 	private String mName;
 	private Bitmap mFlag;
 
@@ -16,6 +13,11 @@ public class Country implements Serializable {
 		super();
 		this.mName = name;
 		this.mFlag = flag;
+	}
+
+	public Country(Parcel parcel) {
+		this.mName = parcel.readString();
+		this.mFlag = Bitmap.CREATOR.createFromParcel(parcel);
 	}
 
 	public String getName() {
@@ -33,5 +35,30 @@ public class Country implements Serializable {
 	public void setFlag(Bitmap flag) {
 		this.mFlag = flag;
 	}
+
+	@Override
+	public int describeContents() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(mName);
+		mFlag.writeToParcel(dest, 0);
+	}
+
+	public static final Creator<Country> CREATOR = new Creator<Country>() {
+
+		@Override
+		public Country createFromParcel(Parcel source) {
+			return new Country(source);
+		}
+
+		@Override
+		public Country[] newArray(int size) {
+			return new Country[size];
+		}
+	};
 
 }
