@@ -2,19 +2,21 @@ package com.example.countries.activity;
 
 import java.io.IOException;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.view.View;
-import android.webkit.WebChromeClient;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.webkit.WebView;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.countries.R;
 import com.example.countries.common.Common;
 import com.example.countries.model.Country;
 
 public class CountryDetailActivity extends Activity {
+	ActionBar mActionBar;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -29,33 +31,38 @@ public class CountryDetailActivity extends Activity {
 	}
 
 	private void initUI() throws IOException {
-		TextView nameTextView = (TextView) findViewById(R.id.country_detail_text_view);
-		ImageView flagImageView = (ImageView) findViewById(R.id.flag_detail_image_view);
-
+		WebView webView = (WebView) findViewById(R.id.web_view);
 		Bundle bundle = getIntent().getExtras();
 		Country country = null;
 		String continent = null;
 		if (bundle != null) {
 			country = bundle.getParcelable(Common.COUNTRY_OBJ);
 			continent = bundle.getString(Common.CONTINENT);
-			nameTextView.setText(country.getName());
-			flagImageView.setImageBitmap(country.getFlag());
 		}
-
-		ImageView backButton = (ImageView) findViewById(R.id.back_button);
-		backButton.setOnClickListener(new View.OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				finish();
-			}
-		});
-
-		WebView webView = (WebView) findViewById(R.id.web_view);
-		webView.setWebChromeClient(new WebChromeClient());
 
 		if (country != null) {
 			webView.loadUrl("file:///android_asset/" + continent + "/" + country.getName() + "/info.html");
+
+			mActionBar = getActionBar();
+			mActionBar.setTitle(country.getName());
+			mActionBar.setIcon(new BitmapDrawable(getResources(), country.getFlag()));
 		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_back:
+			finish();
+			break;
+		}
+
+		return true;
 	}
 }

@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -75,7 +74,6 @@ public class MainActivity extends Activity {
 		final TabModel tabModel = new TabModel();
 		for (String continent : continentList) {
 			TabObject tab = new TabObject(continent, false);
-
 			tabModel.add(tab);
 		}
 
@@ -137,12 +135,6 @@ public class MainActivity extends Activity {
 		// startActivity(intent);
 		// }
 		// });
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
 	}
 
 	private void fillDetaiToListView(TabObject tab) {

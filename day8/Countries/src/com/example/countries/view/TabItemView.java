@@ -15,6 +15,7 @@ public class TabItemView extends LinearLayout {
 	TabObject mTabObject;
 	ImageView mImageView;
 	TextView mTextView;
+	LinearLayout mRootLayout;
 	Context mContext;
 
 	public TabObject getTabObject() {
@@ -40,15 +41,17 @@ public class TabItemView extends LinearLayout {
 
 		mTextView = (TextView) findViewById(R.id.tab_name_text_view);
 		mImageView = (ImageView) findViewById(R.id.tab_image_view);
-
+		mRootLayout = (LinearLayout) findViewById(R.id.root);
 	}
 
 	public void update() {
 		mTextView.setText(mTabObject.getTitle());
 		if (mTabObject.isSelected()) {
 			mImageView.setImageResource(android.R.drawable.star_big_on);
+			mRootLayout.setBackgroundResource(R.drawable.tab_bg_selected);
 		} else {
 			mImageView.setImageResource(android.R.drawable.star_big_off);
+			mRootLayout.setBackgroundResource(R.drawable.tab_bg);
 		}
 	}
 

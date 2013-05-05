@@ -6,7 +6,7 @@
     <com.example.countries.view.HorizontalListView
         android:id="@+id/tab_list_view"
         android:layout_width="wrap_content"
-        android:layout_height="90dp" />
+        android:layout_height="70dp" />
 
     <ListView
         android:id="@+id/country_list_view"

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="ContentDescription">
+        <ignore path="res\layout\country_detail_view.xml" />
+        <ignore path="res\layout\country_item_view.xml" />
+    </issue>
+</lint>
