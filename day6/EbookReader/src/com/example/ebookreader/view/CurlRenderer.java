@@ -1,5 +1,5 @@
 /*
-   Copyright 2012 Harri Smatt
+   Copyright 2013 Harri Smatt
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import javax.microedition.khronos.opengles.GL10;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
-import android.opengl.GLU;
+import android.opengl.Matrix;
 
 /**
  * Actual renderer class.
@@ -42,22 +43,27 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 	public static final int SHOW_ONE_PAGE = 1;
 	public static final int SHOW_TWO_PAGES = 2;
 	// Set to true for checking quickly how perspective projection looks.
-	private static final boolean USE_PERSPECTIVE_PROJECTION = false;
-	// Background fill color.
-	private int mBackgroundColor;
+	// private static final boolean USE_PERSPECTIVE_PROJECTION = false;
+	// Background color constant.
+	private int mBackgroundColor = 0xFF000000;
 	// Curl meshes used for static and dynamic rendering.
 	private Vector<CurlMesh> mCurlMeshes;
 	private RectF mMargins = new RectF();
 	private CurlRenderer.Observer mObserver;
 	// Page rectangles.
-	private RectF mPageRectLeft;
-	private RectF mPageRectRight;
+	private final RectF mPageRectLeft;
+	private final RectF mPageRectRight;
+	// Projection matrix.
+	private final float[] mProjectionMatrix = new float[16];
+	// Shaders.
+	private final CurlShader mShaderShadow = new CurlShader();
+	private final CurlShader mShaderTexture = new CurlShader();
 	// View mode.
 	private int mViewMode = SHOW_ONE_PAGE;
 	// Screen size.
 	private int mViewportWidth, mViewportHeight;
 	// Rect for render area.
-	private RectF mViewRect = new RectF();
+	private final RectF mViewRect = new RectF();
 
 	/**
 	 * Basic constructor.
@@ -72,7 +78,7 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Adds CurlMesh to this renderer.
 	 */
-	public synchronized void addCurlMesh(CurlMesh mesh) {
+	public void addCurlMesh(CurlMesh mesh) {
 		removeCurlMesh(mesh);
 		mCurlMeshes.add(mesh);
 	}
@@ -91,29 +97,137 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 	}
 
 	@Override
-	public synchronized void onDrawFrame(GL10 gl) {
+	public void onDrawFrame(GL10 unused) {
 
 		mObserver.onDrawFrame();
 
-		gl.glClearColor(Color.red(mBackgroundColor) / 255f,
+		GLES20.glClearColor(Color.red(mBackgroundColor) / 255f,
 				Color.green(mBackgroundColor) / 255f,
 				Color.blue(mBackgroundColor) / 255f,
 				Color.alpha(mBackgroundColor) / 255f);
-		gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
-		gl.glLoadIdentity();
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
-		if (USE_PERSPECTIVE_PROJECTION) {
-			gl.glTranslatef(0, 0, -6f);
-		}
+		for (CurlMesh mesh : mCurlMeshes) {
 
-		for (int i = 0; i < mCurlMeshes.size(); ++i) {
-			mCurlMeshes.get(i).onDrawFrame(gl);
+			//
+			// Render drop shadow.
+			//
+
+			GLES20.glEnable(GLES20.GL_BLEND);
+			GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA,
+					GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+			mShaderShadow.useProgram();
+
+			GLES20.glVertexAttribPointer(mShaderShadow.getHandle("aPosition"),
+					3, GLES20.GL_FLOAT, false, 0, mesh.getShadowVertices());
+			GLES20.glEnableVertexAttribArray(mShaderShadow
+					.getHandle("aPosition"));
+
+			GLES20.glVertexAttribPointer(mShaderShadow.getHandle("aPenumbra"),
+					2, GLES20.GL_FLOAT, false, 0, mesh.getShadowPenumbra());
+			GLES20.glEnableVertexAttribArray(mShaderShadow
+					.getHandle("aPenumbra"));
+
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0,
+					mesh.getDropShadowCount());
+
+			GLES20.glDisable(GLES20.GL_BLEND);
+
+			//
+			// Render page textures.
+			//
+
+			mShaderTexture.useProgram();
+
+			GLES20.glVertexAttribPointer(mShaderTexture.getHandle("aPosition"),
+					3, GLES20.GL_FLOAT, false, 0, mesh.getVertices());
+			GLES20.glEnableVertexAttribArray(mShaderTexture
+					.getHandle("aPosition"));
+			GLES20.glVertexAttribPointer(mShaderTexture.getHandle("aNormal"),
+					3, GLES20.GL_FLOAT, false, 0, mesh.getNormals());
+			GLES20.glEnableVertexAttribArray(mShaderTexture
+					.getHandle("aNormal"));
+			GLES20.glVertexAttribPointer(mShaderTexture.getHandle("aTexCoord"),
+					2, GLES20.GL_FLOAT, false, 0, mesh.getTexCoords());
+			GLES20.glEnableVertexAttribArray(mShaderTexture
+					.getHandle("aTexCoord"));
+
+			if (!mesh.getFlipTexture()) {
+				int color = mesh.getPage().getColor(CurlPage.SIDE_FRONT);
+				GLES20.glUniform4f(mShaderTexture.getHandle("uColorFront"),
+						Color.red(color) / 255f, Color.green(color) / 255f,
+						Color.blue(color) / 255f, Color.alpha(color) / 255f);
+
+				color = mesh.getPage().getColor(CurlPage.SIDE_BACK);
+				GLES20.glUniform4f(mShaderTexture.getHandle("uColorBack"),
+						Color.red(color) / 255f, Color.green(color) / 255f,
+						Color.blue(color) / 255f, Color.alpha(color) / 255f);
+
+				GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+						mesh.getTextures()[0]);
+				GLES20.glUniform1i(mShaderTexture.getHandle("sTextureFront"), 0);
+
+				GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+						mesh.getTextures()[1]);
+				GLES20.glUniform1i(mShaderTexture.getHandle("sTextureBack"), 1);
+			} else {
+				int color = mesh.getPage().getColor(CurlPage.SIDE_BACK);
+				GLES20.glUniform4f(mShaderTexture.getHandle("uColorFront"),
+						Color.red(color) / 255f, Color.green(color) / 255f,
+						Color.blue(color) / 255f, Color.alpha(color) / 255f);
+
+				color = mesh.getPage().getColor(CurlPage.SIDE_FRONT);
+				GLES20.glUniform4f(mShaderTexture.getHandle("uColorBack"),
+						Color.red(color) / 255f, Color.green(color) / 255f,
+						Color.blue(color) / 255f, Color.alpha(color) / 255f);
+
+				GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+						mesh.getTextures()[1]);
+				GLES20.glUniform1i(mShaderTexture.getHandle("sTextureFront"), 0);
+
+				GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
+				GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+						mesh.getTextures()[0]);
+				GLES20.glUniform1i(mShaderTexture.getHandle("sTextureBack"), 1);
+			}
+
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0,
+					mesh.getVertexCount());
+
+			//
+			// Render self shadow.
+			//
+
+			GLES20.glEnable(GLES20.GL_BLEND);
+			GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA,
+					GLES20.GL_ONE_MINUS_SRC_ALPHA);
+
+			mShaderShadow.useProgram();
+
+			GLES20.glVertexAttribPointer(mShaderShadow.getHandle("aPosition"),
+					3, GLES20.GL_FLOAT, false, 0, mesh.getShadowVertices());
+			GLES20.glEnableVertexAttribArray(mShaderShadow
+					.getHandle("aPosition"));
+
+			GLES20.glVertexAttribPointer(mShaderShadow.getHandle("aPenumbra"),
+					2, GLES20.GL_FLOAT, false, 0, mesh.getShadowPenumbra());
+			GLES20.glEnableVertexAttribArray(mShaderShadow
+					.getHandle("aPenumbra"));
+
+			GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP,
+					mesh.getDropShadowCount(), mesh.getSelfShadowCount());
+
+			GLES20.glDisable(GLES20.GL_BLEND);
 		}
 	}
 
 	@Override
-	public void onSurfaceChanged(GL10 gl, int width, int height) {
-		gl.glViewport(0, 0, width, height);
+	public void onSurfaceChanged(GL10 unused, int width, int height) {
+		GLES20.glViewport(0, 0, width, height);
 		mViewportWidth = width;
 		mViewportHeight = height;
 
@@ -124,29 +238,28 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 		mViewRect.right = ratio;
 		updatePageRects();
 
-		gl.glMatrixMode(GL10.GL_PROJECTION);
-		gl.glLoadIdentity();
-		if (USE_PERSPECTIVE_PROJECTION) {
-			GLU.gluPerspective(gl, 20f, (float) width / height, .1f, 100f);
-		} else {
-			GLU.gluOrtho2D(gl, mViewRect.left, mViewRect.right,
-					mViewRect.bottom, mViewRect.top);
-		}
+		Matrix.orthoM(mProjectionMatrix, 0, -ratio, ratio, -1f, 1f, -10f, 10f);
+		mShaderTexture.useProgram();
+		GLES20.glUniformMatrix4fv(mShaderTexture.getHandle("uProjectionM"), 1,
+				false, mProjectionMatrix, 0);
+		mShaderShadow.useProgram();
+		GLES20.glUniformMatrix4fv(mShaderShadow.getHandle("uProjectionM"), 1,
+				false, mProjectionMatrix, 0);
 
-		gl.glMatrixMode(GL10.GL_MODELVIEW);
-		gl.glLoadIdentity();
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		GLES20.glDisable(GLES20.GL_CULL_FACE);
 	}
 
 	@Override
-	public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-		gl.glClearColor(0f, 0f, 0f, 1f);
-		gl.glShadeModel(GL10.GL_SMOOTH);
-		gl.glHint(GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_NICEST);
-		gl.glHint(GL10.GL_LINE_SMOOTH_HINT, GL10.GL_NICEST);
-		gl.glHint(GL10.GL_POLYGON_SMOOTH_HINT, GL10.GL_NICEST);
-		gl.glEnable(GL10.GL_LINE_SMOOTH);
-		gl.glDisable(GL10.GL_DEPTH_TEST);
-		gl.glDisable(GL10.GL_CULL_FACE);
+	public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+		try {
+			mShaderShadow.setProgram(CurlStatic.SHADER_SHADOW_VERTEX,
+					CurlStatic.SHADER_SHADOW_FRAGMENT);
+			mShaderTexture.setProgram(CurlStatic.SHADER_TEXTURE_VERTEX,
+					CurlStatic.SHADER_TEXTURE_FRAGMENT);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
 		mObserver.onSurfaceCreated();
 	}
@@ -154,7 +267,7 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 	/**
 	 * Removes CurlMesh from this renderer.
 	 */
-	public synchronized void removeCurlMesh(CurlMesh mesh) {
+	public void removeCurlMesh(CurlMesh mesh) {
 		while (mCurlMeshes.remove(mesh))
 			;
 	}
@@ -170,8 +283,7 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 	 * Set margins or padding. Note: margins are proportional. Meaning a value
 	 * of .1f will produce a 10% margin.
 	 */
-	public synchronized void setMargins(float left, float top, float right,
-			float bottom) {
+	public void setMargins(float left, float top, float right, float bottom) {
 		mMargins.left = left;
 		mMargins.top = top;
 		mMargins.right = right;
@@ -183,7 +295,7 @@ public class CurlRenderer implements GLSurfaceView.Renderer {
 	 * Sets visible page count to one or two. Should be either SHOW_ONE_PAGE or
 	 * SHOW_TWO_PAGES.
 	 */
-	public synchronized void setViewMode(int viewmode) {
+	public void setViewMode(int viewmode) {
 		if (viewmode == SHOW_ONE_PAGE) {
 			mViewMode = viewmode;
 			updatePageRects();

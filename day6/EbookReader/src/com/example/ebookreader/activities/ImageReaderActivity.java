@@ -1,6 +1,9 @@
 package com.example.ebookreader.activities;
 
+import java.io.IOException;
+
 import android.app.Activity;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -10,27 +13,50 @@ import android.os.Bundle;
 import android.view.Menu;
 
 import com.example.ebookreader.R;
+import com.example.ebookreader.common.Common;
 import com.example.ebookreader.view.CurlPage;
 import com.example.ebookreader.view.CurlView;
 
-public class MainActivity extends Activity {
+public class ImageReaderActivity extends Activity {
 
 	private CurlView mCurlView;
+	AssetManager mAssetMgr;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.image_reader);
 
 		int index = 0;
 		if (getLastNonConfigurationInstance() != null) {
 			index = (Integer) getLastNonConfigurationInstance();
 		}
-		mCurlView = (CurlView) findViewById(R.id.curl);
-		mCurlView.setPageProvider(new PageProvider());
-		mCurlView.setSizeChangedObserver(new SizeChangedObserver());
-		mCurlView.setCurrentIndex(index);
-		mCurlView.setBackgroundColor(0xFF202830);
+
+		Bundle bundle = getIntent().getExtras();
+		if (bundle != null) {
+			String storyName = bundle.getString(Common.STORY_NAME);
+			mAssetMgr = getAssets();
+			try {
+				String[] imageList = mAssetMgr.list(storyName);
+				if (imageList != null) {
+					for (int i = 0; i < imageList.length; i++) {
+						imageList[i] = storyName + "/" + imageList[i];
+					}
+					mCurlView = (CurlView) findViewById(R.id.curl);
+					PageProvider provider = new PageProvider();
+					provider.setImageNames(imageList);
+
+					mCurlView.setPageProvider(provider);
+					mCurlView.setSizeChangedObserver(new SizeChangedObserver());
+					mCurlView.setCurrentIndex(index);
+					mCurlView.setBackgroundColor(0xFFC0C0C0);
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 	@Override
@@ -63,18 +89,34 @@ public class MainActivity extends Activity {
 	private class PageProvider implements CurlView.PageProvider {
 
 		// Bitmap resources.
-		private int[] mBitmapIds = { R.drawable.img1, R.drawable.img2, R.drawable.img3, R.drawable.img4, R.drawable.img5 };
+		// private int[] mBitmapIds = { R.drawable.obama, R.drawable.road_rage,
+		// R.drawable.taipei_101, R.drawable.world };
+
+		private String[] mImageNames;
+
+		public void setImageNames(String[] paths) {
+			mImageNames = paths;
+		}
 
 		@Override
 		public int getPageCount() {
-			return mBitmapIds.length;
+			if (mImageNames == null)
+				return 0;
+
+			return mImageNames.length;
 		}
 
 		private Bitmap loadBitmap(int width, int height, int index) {
 			Bitmap b = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 			b.eraseColor(0xFFFFFFFF);
 			Canvas c = new Canvas(b);
-			Drawable d = getResources().getDrawable(mBitmapIds[index]);
+			Drawable d = null;
+			try {
+				d = Drawable.createFromStream(mAssetMgr.open(mImageNames[index]), null);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
 			int margin = 7;
 			int border = 3;
@@ -108,61 +150,10 @@ public class MainActivity extends Activity {
 
 		@Override
 		public void updatePage(CurlPage page, int width, int height, int index) {
-
-			// switch (index) {
-			// // First case is image on front side, solid colored back.
-			// case 0: {
-			// Bitmap front = loadBitmap(width, height, 0);
-			// page.setTexture(front, CurlPage.SIDE_FRONT);
-			// page.setColor(Color.rgb(180, 180, 180), CurlPage.SIDE_BACK);
-			// break;
-			// }
-			// // Second case is image on back side, solid colored front.
-			// case 1: {
-			// Bitmap back = loadBitmap(width, height, 1);
-			// page.setTexture(back, CurlPage.SIDE_BACK);
-			// page.setColor(Color.rgb(127, 140, 180), CurlPage.SIDE_FRONT);
-			// break;
-			// }
-			// // Third case is images on both sides.
-			// case 2: {
-			// Bitmap front = loadBitmap(width, height, 2);
-			// Bitmap back = loadBitmap(width, height, 3);
-			// page.setTexture(front, CurlPage.SIDE_FRONT);
-			// page.setTexture(back, CurlPage.SIDE_BACK);
-			// break;
-			// }
-			// // Fourth case is images on both sides - plus they are blend
-			// against
-			// // separate colors.
-			// case 3: {
-			// Bitmap front = loadBitmap(width, height, 3);
-			// Bitmap back = loadBitmap(width, height, 4);
-			// page.setTexture(front, CurlPage.SIDE_FRONT);
-			// page.setTexture(back, CurlPage.SIDE_BACK);
-			// page.setColor(Color.argb(127, 170, 130, 255),
-			// CurlPage.SIDE_FRONT);
-			// page.setColor(Color.rgb(255, 190, 150), CurlPage.SIDE_BACK);
-			// break;
-			// }
-			// // Fifth case is same image is assigned to front and back. In
-			// this
-			// // scenario only one texture is used and shared for both sides.
-			// case 4:
-			// Bitmap front = loadBitmap(width, height, 0);
-			// page.setTexture(front, CurlPage.SIDE_BOTH);
-			// page.setColor(Color.argb(127, 255, 255, 255),
-			// CurlPage.SIDE_BACK);
-			// break;
-			// }
-
-			int temp = index;
-			if (index > 0 && index < mBitmapIds.length - 2)
-				temp++;
-			Bitmap front = loadBitmap(width, height, temp);
+			Bitmap front = loadBitmap(width, height, index);
 			Bitmap back = loadBitmap(width, height, index);
-			page.setTexture(front, CurlPage.SIDE_FRONT);
-			page.setTexture(back, CurlPage.SIDE_BACK);
+			page.setBitmap(front, CurlPage.SIDE_FRONT);
+			page.setBitmap(back, CurlPage.SIDE_BACK);
 		}
 
 	}
