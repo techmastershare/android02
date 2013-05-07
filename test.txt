@@ -1,4 +1,3 @@
-
-i
-test1
-
+Repository: https://github.com/techmastershare/android02.git
+User name: techmastershare@gmail.com
+Password: techmaster123

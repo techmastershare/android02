@@ -59,6 +59,19 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	private OnItemLongClickListener mOnItemLongClicked;
 	private boolean mDataChanged = false;
 
+	//
+	private TabItemView selectedTab;
+
+	public void setSelectedTab(TabItemView tab) {
+		selectedTab = tab;
+	}
+
+	public TabItemView getSelectedTab() {
+		return selectedTab;
+	}
+
+	//
+
 	public HorizontalListView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initView();

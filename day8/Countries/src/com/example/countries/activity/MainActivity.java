@@ -35,6 +35,7 @@ public class MainActivity extends Activity {
 	private CountryListAdapter mCountryAdapter;
 	private ListView mCountryListView;
 	private String mContinent;
+	private HorizontalListView mTabListView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +46,7 @@ public class MainActivity extends Activity {
 	}
 
 	private void initUI() {
-		HorizontalListView tabListView = (HorizontalListView) findViewById(R.id.tab_list_view);
+		mTabListView = (HorizontalListView) findViewById(R.id.tab_list_view);
 		mCountryListView = (ListView) findViewById(R.id.country_list_view);
 		mCountryModel = new CountryModel();
 		mCountryAdapter = new CountryListAdapter();
@@ -83,10 +84,10 @@ public class MainActivity extends Activity {
 			fillDetaiToListView(tabObj);
 		}
 
-		TabListAdapter tabAdapter = new TabListAdapter();
+		final TabListAdapter tabAdapter = new TabListAdapter();
 		tabAdapter.setContext(getApplicationContext());
 		tabAdapter.setTabModel(tabModel);
-		tabListView.setAdapter(tabAdapter);
+		mTabListView.setAdapter(tabAdapter);
 
 		mCountryAdapter.setOnButtonDetailClicked(new CountryItemView.OnButtonDetailClick() {
 
@@ -101,40 +102,28 @@ public class MainActivity extends Activity {
 			}
 		});
 
-		tabListView.setOnItemClickListener(new OnItemClickListener() {
+		mTabListView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View arg1, int index, long arg3) {
 
-				TabItemView view;
-				for (int i = 0; i < parent.getChildCount(); i++) {
-					view = (TabItemView) parent.getChildAt(i);
-					view.clearSelected();
-					view.update();
+				TabItemView view = mTabListView.getSelectedTab();
+				if (view == null) {
+					view = (TabItemView) parent.getChildAt(0);
 				}
+				view.clearSelected();
+				view.update();
 
 				view = (TabItemView) arg1;
 				TabObject tabObject = view.getTabObject();
 				tabObject.setSelected(true);
 				view.update();
+				view.requestFocus();
+				mTabListView.setSelectedTab(view);
 
 				fillDetaiToListView(tabObject);
 			}
 		});
-
-		// mCountryListView.setOnItemClickListener(new OnItemClickListener() {
-		//
-		// @Override
-		// public void onItemClick(AdapterView<?> arg0, View view, int arg2,
-		// long arg3) {
-		// CountryItemView countryView = (CountryItemView) view;
-		// Intent intent = new Intent(getApplicationContext(),
-		// CountryDetailActivity.class);
-		// Country country = countryView.getCountry();
-		// intent.putExtra("country_obj", country);
-		// startActivity(intent);
-		// }
-		// });
 	}
 
 	private void fillDetaiToListView(TabObject tab) {
